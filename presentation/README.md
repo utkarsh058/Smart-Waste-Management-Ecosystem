@@ -1,12 +1,14 @@
-# 📄 Presentation PDF / PPT Folder
+# 📄 Mandatory Presentation PDF Slot
 
-> **CodersEra Hackathon Mandatory Submission Slot**
+> **CodersEra Hackathon Mandatory PDF Submission**
 
-Please place your official presentation file here:
+Please upload your official presentation PDF file here:
 - `Smart_Waste_Management_Ecosystem_Presentation.pdf`
-- or `Smart_Waste_Management_Ecosystem_Presentation.pptx`
 
-### Presentation Overview & Key Highlights:
-1. **Problem Statement**: Municipal waste mismanagement, landfill methane emissions, and inefficient garbage truck routing.
-2. **Hardware Prototype**: Dual-container automatic segregation (Wet/Dry) using IR Sensor, Capacitive Moisture Sensor, MG996R Servo Motor, Dual HC-SR04 Ultrasonic Sensors, and Red/Yellow LED & Buzzer Alarms powered by ESP32.
-3. **Software Portal**: Municipal Command Center, Live GIS Map, Travelling Salesperson Problem (TSP) AI Route Optimizer, Blockchain Weight Receipts (`SolidWasteRecyclingAudit.sol`), and Citizen Eco-Token Rewards.
+---
+
+### How to Upload Your Presentation PDF:
+1. Open this folder link on GitHub: [https://github.com/utkarsh058/Smart-Waste-Management-Ecosystem/tree/main/presentation](https://github.com/utkarsh058/Smart-Waste-Management-Ecosystem/tree/main/presentation)
+2. Click **Add file** (top right) $\rightarrow$ select **Upload files**.
+3. Drag and drop your `Smart_Waste_Management_Ecosystem_Presentation.pdf` file.
+4. Click the green **Commit changes** button at the bottom.
