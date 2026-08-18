@@ -1,9 +1,5 @@
 # 🗑️ Smart Waste Management Ecosystem
 
-> **Automatic Waste Segregation & Overflow Monitoring System (2 Containers – Wet & Dry)**  
-> 🚀 **CodersEra Hackathon Project Submission**  
-> 🔗 **Repository**: [https://github.com/utkarsh058/Smart-Waste-Management-Ecosystem](https://github.com/utkarsh058/Smart-Waste-Management-Ecosystem)
-
 ---
 
 ## 📌 Submission Checklist
@@ -31,13 +27,6 @@ An IoT & Web-based Smart Waste System that automatically sorts garbage into **We
   - 🔴 **Wet Overflow**: Red LED + Buzzer ON ($\ge 85\%$)
   - 🟡 **Dry Overflow**: Yellow LED + Buzzer ON ($\ge 85\%$)
 - **ESP32 Microcontroller**: Connects hardware to the Web Command Center.
-
----
-
-## 📁 Hackathon Submission Slots
-
-1. 📄 **Presentation PDF / PPT**: Drop your PDF in the [`/presentation`](./presentation/) folder.
-2. 🛠️ **Prototype Photos / Video**: Drop your prototype images in the [`/prototype`](./prototype/) folder.
 
 ---
 
