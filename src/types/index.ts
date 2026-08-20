@@ -1,4 +1,4 @@
-export type BinStatus = 'Normal (<85%)' | 'Alert (≥85%)' | 'Overflow (~100%)';
+export type BinStatus = 'Normal (<85%)' | 'Alert (≥85%)' | 'Overflow (~100%)' | 'Critical' | 'Warning' | 'Optimal';
 export type ServoDirection = 'LEFT (WET BIN)' | 'RIGHT (DRY BIN)' | 'CENTER (IDLE)';
 
 export interface SmartBin {
@@ -12,6 +12,7 @@ export interface SmartBin {
   // Hardware Prototype Sensors
   irSensorTriggered: boolean; // Item detection at entry
   moistureSensorValue: number; // Wet / Dry detection (0-1024)
+  moistureAnalog?: number;
   isWetDetected: boolean;
   servoDirection: ServoDirection;
   
@@ -21,6 +22,11 @@ export interface SmartBin {
   dryBinFillLevel: number; // % fill level (0-100%)
   dryDistanceCm: number; // Ultrasonic Sensor (Dry Bin)
   
+  fillLevel?: number;
+  distanceCm?: number;
+  wetPercentage?: number;
+  dryPercentage?: number;
+
   // Hardware Alerts (LED & Buzzer)
   wetLedBuzzerOn: boolean; // Red LED + Buzzer
   dryLedBuzzerOn: boolean; // Yellow LED + Buzzer
@@ -61,7 +67,7 @@ export interface BlockchainReceipt {
 export interface CloudLog {
   id: string;
   timestamp: string;
-  provider: 'ESP32 MQTT Broker';
+  provider: 'ESP32 MQTT Broker' | 'AWS IoT Core' | 'Azure IoT Hub' | 'GCP PubSub';
   topic: string;
   deviceId: string;
   payload: Record<string, any>;

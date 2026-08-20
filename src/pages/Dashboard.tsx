@@ -36,10 +36,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
 }) => {
   const t = translations[lang];
 
+  const getFill = (b: SmartBin) => b.fillLevel ?? Math.max(b.wetBinFillLevel, b.dryBinFillLevel);
   const totalBins = bins.length;
-  const criticalBins = bins.filter(b => b.fillLevel >= 85);
-  const warningBins = bins.filter(b => b.fillLevel >= 70 && b.fillLevel < 85);
-  const optimalBins = bins.filter(b => b.fillLevel < 70);
+  const criticalBins = bins.filter(b => getFill(b) >= 85);
+  const warningBins = bins.filter(b => getFill(b) >= 70 && getFill(b) < 85);
+  const optimalBins = bins.filter(b => getFill(b) < 70);
   const activeTrucks = trucks.filter(t => t.status === 'Collecting' || t.status === 'In-Transit');
 
   // Chart data
@@ -271,41 +272,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {bins.filter(b => b.fillLevel >= 70).map((bin) => (
-                <tr key={bin.id} className="hover:bg-slate-50 transition">
-                  <td className="p-3 font-semibold text-slate-900">
-                    <div className="font-mono text-emerald-700 text-xs font-extrabold">{bin.id}</div>
-                    <div className="text-slate-800 font-sans">{bin.name}</div>
-                  </td>
-                  <td className="p-3 text-slate-600 font-medium">{bin.ward}</td>
-                  <td className="p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-slate-200 rounded-full h-2.5 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${
-                            bin.fillLevel >= 85 ? 'bg-rose-600' : 'bg-amber-500'
-                          }`}
-                          style={{ width: `${bin.fillLevel}%` }}
-                        ></div>
+              {bins.filter(b => getFill(b) >= 70).map((bin) => {
+                const fillPct = getFill(bin);
+                const distance = bin.distanceCm ?? bin.wetDistanceCm;
+                return (
+                  <tr key={bin.id} className="hover:bg-slate-50 transition">
+                    <td className="p-3 font-semibold text-slate-900">
+                      <div className="font-mono text-emerald-700 text-xs font-extrabold">{bin.id}</div>
+                      <div className="text-slate-800 font-sans">{bin.name}</div>
+                    </td>
+                    <td className="p-3 text-slate-600 font-medium">{bin.ward}</td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${
+                              fillPct >= 85 ? 'bg-rose-600' : 'bg-amber-500'
+                            }`}
+                            style={{ width: `${fillPct}%` }}
+                          ></div>
+                        </div>
+                        <span className="font-extrabold font-mono text-slate-900">{fillPct}%</span>
                       </div>
-                      <span className="font-extrabold font-mono text-slate-900">{bin.fillLevel}%</span>
-                    </div>
-                  </td>
-                  <td className="p-3 text-slate-600 font-mono">
-                    <span className="text-emerald-700 font-bold">{bin.wetPercentage}% Wet</span> /{' '}
-                    <span className="text-blue-700 font-bold">{bin.dryPercentage}% Dry</span>
-                  </td>
-                  <td className="p-3 font-mono font-bold text-slate-700">{bin.distanceCm} cm</td>
-                  <td className="p-3 text-right">
-                    <button
-                      onClick={() => onDispatchTruck(bin.id)}
-                      className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition shadow-sm active:scale-95"
-                    >
-                      {bin.assignedTruckId ? 'Truck Assigned' : 'गाड़ी भेजें (Dispatch)'}
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="p-3 text-slate-600 font-mono">
+                      <span className="text-emerald-700 font-bold">{bin.wetBinFillLevel}% Wet</span> /{' '}
+                      <span className="text-blue-700 font-bold">{bin.dryBinFillLevel}% Dry</span>
+                    </td>
+                    <td className="p-3 font-mono font-bold text-slate-700">{distance} cm</td>
+                    <td className="p-3 text-right">
+                      <button
+                        onClick={() => onDispatchTruck(bin.id)}
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition shadow-sm active:scale-95"
+                      >
+                        {bin.assignedTruckId ? 'Truck Assigned' : 'गाड़ी भेजें (Dispatch)'}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -51,13 +51,16 @@ export function App() {
   const handleRefreshData = () => {
     // Simulate updating IoT bin fill levels slightly
     setBins(prev => prev.map(bin => {
+      const currentFill = bin.fillLevel ?? Math.max(bin.wetBinFillLevel, bin.dryBinFillLevel);
       const delta = Math.floor(Math.random() * 5) - 2;
-      const newFill = Math.min(100, Math.max(10, bin.fillLevel + delta));
+      const newFill = Math.min(100, Math.max(10, currentFill + delta));
       return {
         ...bin,
         fillLevel: newFill,
+        wetBinFillLevel: newFill,
+        dryBinFillLevel: Math.max(10, newFill - 10),
         distanceCm: Math.max(8, Math.floor(100 - newFill)),
-        status: newFill >= 85 ? 'Critical' : newFill >= 70 ? 'Warning' : 'Optimal'
+        status: newFill >= 85 ? 'Alert (≥85%)' : newFill >= 70 ? 'Warning' : 'Normal (<85%)'
       };
     }));
   };
@@ -88,8 +91,10 @@ export function App() {
         return {
           ...bin,
           fillLevel: 15,
+          wetBinFillLevel: 15,
+          dryBinFillLevel: 15,
           distanceCm: 95,
-          status: 'Optimal',
+          status: 'Normal (<85%)',
           assignedTruckId: undefined
         };
       }
@@ -105,7 +110,7 @@ export function App() {
     setComplaints(prev => prev.map(c => c.id === id ? { ...c, upvotes: c.upvotes + 1 } : c));
   };
 
-  const criticalBinCount = bins.filter(b => b.fillLevel >= 85).length;
+  const criticalBinCount = bins.filter(b => (b.fillLevel ?? Math.max(b.wetBinFillLevel, b.dryBinFillLevel)) >= 85).length;
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-slate-100 text-slate-900 flex flex-col font-sans">

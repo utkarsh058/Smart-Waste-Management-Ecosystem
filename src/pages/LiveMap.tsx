@@ -57,10 +57,12 @@ export const LiveMap: React.FC<LiveMapProps> = ({
 
     // Render Bins
     if (filterMode === 'all' || filterMode === 'critical') {
-      const displayBins = filterMode === 'critical' ? bins.filter(b => b.fillLevel >= 85) : bins;
+      const getFill = (b: SmartBin) => b.fillLevel ?? Math.max(b.wetBinFillLevel, b.dryBinFillLevel);
+      const displayBins = filterMode === 'critical' ? bins.filter(b => getFill(b) >= 85) : bins;
 
       displayBins.forEach((bin) => {
-        const color = bin.fillLevel >= 85 ? '#dc2626' : bin.fillLevel >= 70 ? '#d97706' : '#16a34a';
+        const fill = getFill(bin);
+        const color = fill >= 85 ? '#dc2626' : fill >= 70 ? '#d97706' : '#16a34a';
 
         const customIcon = L.divIcon({
           className: 'custom-bin-marker',
@@ -79,7 +81,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
               font-weight: bold;
               font-size: 11px;
             ">
-              ${bin.fillLevel}%
+              ${fill}%
             </div>
           `,
           iconSize: [32, 32],
@@ -140,7 +142,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
     }
 
     const criticalCoords: [number, number][] = bins
-      .filter(b => b.fillLevel >= 85)
+      .filter(b => (b.fillLevel ?? Math.max(b.wetBinFillLevel, b.dryBinFillLevel)) >= 85)
       .map(b => [b.lat, b.lng]);
 
     if (criticalCoords.length > 0 && trucks[0]) {
@@ -206,53 +208,58 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         <div ref={mapContainerRef} className="w-full h-full z-10" />
 
         {/* Selected Bin Detail Floating Drawer */}
-        {selectedBin && (
-          <div className="absolute top-4 right-4 z-20 w-80 p-4 rounded-2xl bg-white/95 border border-slate-200 backdrop-blur-md shadow-xl space-y-3 animate-fade-in text-xs">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <div>
-                <span className="font-mono text-emerald-700 font-extrabold text-[11px]">{selectedBin.id}</span>
-                <h4 className="font-extrabold text-slate-900 text-sm">{selectedBin.name}</h4>
+        {selectedBin && (() => {
+          const selectedFill = selectedBin.fillLevel ?? Math.max(selectedBin.wetBinFillLevel, selectedBin.dryBinFillLevel);
+          const distance = selectedBin.distanceCm ?? selectedBin.wetDistanceCm;
+          const moisture = selectedBin.moistureAnalog ?? selectedBin.moistureSensorValue;
+          return (
+            <div className="absolute top-4 right-4 z-20 w-80 p-4 rounded-2xl bg-white/95 border border-slate-200 backdrop-blur-md shadow-xl space-y-3 animate-fade-in text-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                <div>
+                  <span className="font-mono text-emerald-700 font-extrabold text-[11px]">{selectedBin.id}</span>
+                  <h4 className="font-extrabold text-slate-900 text-sm">{selectedBin.name}</h4>
+                </div>
+                <button
+                  onClick={() => setSelectedBin(null)}
+                  className="text-slate-400 hover:text-slate-700 text-base font-bold px-1.5"
+                >
+                  ✕
+                </button>
               </div>
-              <button
-                onClick={() => setSelectedBin(null)}
-                className="text-slate-400 hover:text-slate-700 text-base font-bold px-1.5"
-              >
-                ✕
-              </button>
-            </div>
 
-            <div className="space-y-2">
-              <div className="flex justify-between items-center text-slate-700 font-medium">
-                <span>स्थान (Ward Location):</span>
-                <span className="font-bold text-slate-900">{selectedBin.ward}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-slate-700 font-medium">
+                  <span>स्थान (Ward Location):</span>
+                  <span className="font-bold text-slate-900">{selectedBin.ward}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-700 font-medium">
+                  <span>भरने की स्थिति (Fill Level):</span>
+                  <span className={`font-bold font-mono text-sm ${selectedFill >= 85 ? 'text-rose-600' : 'text-emerald-700'}`}>
+                    {selectedFill}%
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-slate-700 font-medium">
+                  <span>सेंसर दूरी (Ultrasonic):</span>
+                  <span className="font-mono text-blue-700 font-bold">{distance} cm</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-700 font-medium">
+                  <span>नमी स्तर (Moisture):</span>
+                  <span className="font-mono text-amber-700 font-bold">{moisture} / 1024</span>
+                </div>
               </div>
-              <div className="flex justify-between items-center text-slate-700 font-medium">
-                <span>भरने की स्थिति (Fill Level):</span>
-                <span className={`font-bold font-mono text-sm ${selectedBin.fillLevel >= 85 ? 'text-rose-600' : 'text-emerald-700'}`}>
-                  {selectedBin.fillLevel}%
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-slate-700 font-medium">
-                <span>सेंसर दूरी (Ultrasonic):</span>
-                <span className="font-mono text-blue-700 font-bold">{selectedBin.distanceCm} cm</span>
-              </div>
-              <div className="flex justify-between items-center text-slate-700 font-medium">
-                <span>नमी स्तर (Moisture):</span>
-                <span className="font-mono text-amber-700 font-bold">{selectedBin.moistureAnalog} / 1024</span>
-              </div>
-            </div>
 
-            <div className="pt-2 border-t border-slate-200">
-              <button
-                onClick={() => onDispatchTruck(selectedBin.id)}
-                className="w-full py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5"
-              >
-                <Truck className="w-4 h-4" />
-                <span>{selectedBin.assignedTruckId ? 'Truck Dispatched' : 'कचरा गाड़ी भेजें (Dispatch Truck)'}</span>
-              </button>
+              <div className="pt-2 border-t border-slate-200">
+                <button
+                  onClick={() => onDispatchTruck(selectedBin.id)}
+                  className="w-full py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition shadow-sm active:scale-95 flex items-center justify-center gap-1.5"
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>{selectedBin.assignedTruckId ? 'Truck Dispatched' : 'कचरा गाड़ी भेजें (Dispatch Truck)'}</span>
+                </button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
